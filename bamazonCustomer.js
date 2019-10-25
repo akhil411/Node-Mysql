@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+const cTable = require('console.table');
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -15,11 +16,16 @@ connection.connect(function (err) {
 readProducts();
 function readProducts() {
     console.log("Displaying all products.....");
+    var values = [];
+    var value;
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
         res.forEach(function (item) {
-            console.log("\n ID: " + item.id + "     Product: " + item.product_name + "      Price: " + item.price);
+            value = [item.id, item.product_name, item.price];
+            values.push(value);
         })
+        console.log("\n\n");
+        console.table(['id', 'Product', 'Price'], values);
         productSelection();
     });
 }
@@ -45,12 +51,13 @@ function productSelection() {
         });
 }
 
-function productCheck(quantity, id) {
+function productCheck(quantityChoice, id) {
     connection.query("SELECT * FROM products WHERE id=" + id, function (err, res) {
-        if (res[0].stock_quantity >= quantity) {
-            console.log("\nThanks for purchasing " + res[0].product_name + ". Quantity " + quantity + ". Total price is $" + res[0].price * quantity);
-            var updatedQuantity = res[0].stock_quantity - quantity;
-            updateProduct(updatedQuantity, id);
+        if (res[0].stock_quantity >= quantityChoice) {
+            console.log("\nThanks for purchasing " + res[0].product_name + ". Quantity " + quantityChoice + ". Total price is $" + res[0].price * quantityChoice);
+            var updatedQuantity = res[0].stock_quantity - quantityChoice;
+            var productSales = res[0].price * quantityChoice;
+            updateProduct(updatedQuantity, id, productSales);
         }
         else {
             console.log("\n\n\n\n\nInsufficient Quantity");
@@ -60,6 +67,6 @@ function productCheck(quantity, id) {
     })
 }
 
-function updateProduct(quantity, id) {
-    connection.query("UPDATE products SET stock_quantity = " + quantity + " WHERE id = " + id);
+function updateProduct(updatedQuantity, id, productSales) {
+    connection.query("UPDATE products SET stock_quantity = " + updatedQuantity + ", product_sales = " + productSales + " WHERE id = " + id);
 }

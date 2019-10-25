@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+const cTable = require('console.table');
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -41,9 +42,14 @@ function managerSelection() {
 function viewProducts() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
+        var values = [];
+        var value;
         res.forEach(function (item) {
-            console.log("\n ID: " + item.id + "     Product: " + item.product_name + "      Price: " + item.price + "       Stock Quantity: "+ item.stock_quantity);
+            value = [item.id, item.product_name, item.price, item.stock_quantity];
+            values.push(value);
         });
+        console.log("\n\n");
+        console.table(['id', 'Product', 'Price', 'Stock Quantity'], values);
     });
     connection.end();
 }
@@ -51,9 +57,14 @@ function viewProducts() {
 function lowInventory() {
     connection.query("SELECT * FROM products WHERE stock_quantity < 5", function (err, res) {
         if (err) throw err;
+        var values = [];
+        var value;
         res.forEach(function (item) {
-            console.log("\n ID: " + item.id + "     Product: " + item.product_name + "      Price: " + item.price + "       Stock Quantity: "+ item.stock_quantity);
+            value = [item.id, item.product_name, item.price, item.stock_quantity];
+            values.push(value);
         });
+        console.log("\n\n");
+        console.table(['id', 'Product', 'Price', 'Stock Quantity'], values);
     });
     connection.end();
 }
